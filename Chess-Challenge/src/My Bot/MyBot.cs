@@ -7,10 +7,12 @@ public class MyBot : IChessBot
     {
         Move[] moves = board.GetLegalMoves();
 
-        Random rand = new Random();
+        //Decide on a set of "good" sets.
 
-        int moveNR =  rand.Next(moves.Length);
+        //Evaluate the board.
 
-        return moves[moveNR];
+        //Choose the best one.
+
+        return moves[0];
     }
 }
