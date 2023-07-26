@@ -5,6 +5,10 @@ using System.Diagnostics;
 
 public class MyBot : IChessBot
 {
+    //TODO: COMPRESS ALL DATA TABLES!
+    //TODO: ADD ALPHA PRUNING
+    //TODO: DO MORE SMART STUFF!
+
     private int[,] posMap = new int[8, 8];
     private Dictionary<PieceType, int> pieceValues = new Dictionary<PieceType, int>
     {
@@ -16,6 +20,66 @@ public class MyBot : IChessBot
         { PieceType.Queen, 90 },
         { PieceType.King, 900 },
     };
+
+    private int[] pawnPosValues =
+        {
+              0,  0,  0,  0,  0,  0,  0,  0 ,
+             50, 50, 50, 50, 50, 50, 50, 50 ,
+             10, 10, 20, 30, 30, 20, 10, 10 ,
+              5,  5, 10, 25, 25, 10,  5,  5 ,
+              0,  0,  0, 20, 20,  0,  0,  0 ,
+              5, -5, -10, 0, 0, -10, -5,  5 ,
+              5, 10, 10, -20, -20, 10, 10, 5 ,
+              0,  0,  0,  0,  0,  0,  0,  0 
+        };
+
+    private int[] knightPosValues =
+        {
+              -50, -40, -30, -30, -30, -30, -40, -50 ,
+             -40, -20, 0, 0, 0, 0, -20, -40 ,
+             -30, 0, 10, 15, 15, 10, 0, -30 ,
+             -30, 5, 15, 20, 20, 15, 5, -30 ,
+              -30, 0, 15, 20, 20, 15, 0, -30,
+              -30, 5, 10, 15, 15, 10, 5, -30 ,
+             -40, -20, 0, 5, 5, 0, -20, -40,
+              -50, -40, -30, -30, -30, -30, -40, -50
+        };
+
+    private int[] bishopPosValues =
+        {
+              -20, -10, -10, -10, -10, -10, -10, -20,
+             -10, 0, 0, 0, 0, 0, 0, -10 ,
+             -10, 0, 5, 10, 10, 5, 0, -10 ,
+              -10, 5, 5, 10, 10, 5, 5, -10 ,
+              -10, 0, 10, 10, 10, 10, 0, -10 ,
+              -10, 10, 10, 10, 10, 10, 10, -10  ,
+              -10, 5, 0, 0, 0, 0, 5, -10 ,
+              -20, -10, -10, -10, -10, -10, -10, -20
+        };
+
+    private int[] rookPosValues =
+    {
+              0,0,0,0,0,0,0,0,
+              5, 10, 10, 10, 10, 10, 10, 5 ,
+             -5, 0, 0, 0, 0, 0, 0, -5 ,
+             -5, 0, 0, 0, 0, 0, 0, -5 ,
+             -5, 0, 0, 0, 0, 0, 0, -5 ,
+             -5, 0, 0, 0, 0, 0, 0, -5  ,
+             -5, 0, 0, 0, 0, 0, 0, -5 ,
+              0, 0, 0, 5, 5, 0, 0,  0
+        };
+
+    private int[] queenPosValues =
+    {
+              -20, -10, -10, -5, -5, -10, -10, -20,
+              -10,   0,   5,  0,  0,   0,   0, -10 ,
+              -10,   5,   5,  5,  5,   5,   0, -10 ,
+               -5,   0,   5,  5,  5,   5,   0,  -5 ,
+               -0,   0,   5,  5,  5,   5,   0,  -5 ,
+              -10,   5,   5,  5,  5,   5,   0, -10 ,
+              -10,   0,   5,  0,  0,   0,   0, -10 ,
+              -20, -10, -10, -5, -5, -10, -10, -20
+        };
 
     private const int MaxDepth = 1;
 
@@ -92,6 +156,7 @@ public class MyBot : IChessBot
         int score = 0;
 
         score += EvaluatePieceWeight(board);
+        score += EvaluatePiecePosition(board);
 
         return score;
     }
@@ -159,34 +224,38 @@ public class MyBot : IChessBot
                 {
                     case PieceType.Pawn:
                         {
-                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Pawn] : -pieceValues[PieceType.Pawn];
+                            pieceScore = piece.IsWhite ? pawnPosValues[piece.Square.Index] : -pawnPosValues[piece.Square.Index];
                             break;
                         }
                     case PieceType.Knight:
                         {
-                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Knight] : -pieceValues[PieceType.Knight];
+                            pieceScore = piece.IsWhite ? knightPosValues[piece.Square.Index] : -knightPosValues[piece.Square.Index];
                             break;
                         }
                     case PieceType.Bishop:
                         {
-                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Bishop] : -pieceValues[PieceType.Bishop];
+                            pieceScore = piece.IsWhite ? bishopPosValues[piece.Square.Index] : -bishopPosValues[piece.Square.Index];
                             break;
                         }
                     case PieceType.Rook:
                         {
-                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Rook] : -pieceValues[PieceType.Rook];
+                            pieceScore = piece.IsWhite ? rookPosValues[piece.Square.Index] : -rookPosValues[piece.Square.Index];
                             break;
                         }
                     case PieceType.Queen:
                         {
-                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Queen] : -pieceValues[PieceType.Queen];
+                            pieceScore = piece.IsWhite ? queenPosValues[piece.Square.Index] : -queenPosValues[piece.Square.Index];
                             break;
                         }
-                    case PieceType.King:
+                    default: 
                         {
-                            pieceScore = piece.IsWhite ? pieceValues[PieceType.King] : -pieceValues[PieceType.King];
                             break;
                         }
+                    //case PieceType.King:
+                    //    {
+                    //        pieceScore = piece.IsWhite ? pieceValues[PieceType.King] : -pieceValues[PieceType.King];
+                    //        break;
+                    //    }
                 }
                 score += pieceScore;
             }
