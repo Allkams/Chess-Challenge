@@ -17,7 +17,7 @@ public class MyBot : IChessBot
         { PieceType.King, 900 },
     };
 
-    private const int MaxDepth = 2;
+    private const int MaxDepth = 1;
 
     public Move Think(Board board, Timer timer)
     {
@@ -48,7 +48,7 @@ public class MyBot : IChessBot
     {
         if(depth == 0)
         {
-            EvaluateBoard(board);
+            return EvaluateBoard(board);
         }
 
         int bestScore;
@@ -66,7 +66,7 @@ public class MyBot : IChessBot
 
                 board.UndoMove(move);
 
-                bestScore = Math.Min(bestScore, score);
+                bestScore = Math.Max(bestScore, score);
             }
         }
         else
@@ -91,11 +91,106 @@ public class MyBot : IChessBot
     {
         int score = 0;
 
-        // Evaluate material balance
+        score += EvaluatePieceWeight(board);
 
-        //somehow.
+        return score;
+    }
 
+    private int EvaluatePieceWeight(Board board)
+    {
+        int score = 0;
 
-        return new Random().Next(-9000, 9000);
+        foreach (PieceList pieceList in board.GetAllPieceLists())
+        {
+            foreach (Piece piece in pieceList)
+            {
+                int pieceScore = 0;
+
+                switch (piece.PieceType)
+                {
+                    case PieceType.Pawn:
+                        {
+                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Pawn] : -pieceValues[PieceType.Pawn];
+                            break;
+                        }
+                    case PieceType.Knight:
+                        {
+                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Knight] : -pieceValues[PieceType.Knight];
+                            break;
+                        }
+                    case PieceType.Bishop:
+                        {
+                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Bishop] : -pieceValues[PieceType.Bishop];
+                            break;
+                        }
+                    case PieceType.Rook:
+                        {
+                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Rook] : -pieceValues[PieceType.Rook];
+                            break;
+                        }
+                    case PieceType.Queen:
+                        {
+                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Queen] : -pieceValues[PieceType.Queen];
+                            break;
+                        }
+                    case PieceType.King:
+                        {
+                            pieceScore = piece.IsWhite ? pieceValues[PieceType.King] : -pieceValues[PieceType.King];
+                            break;
+                        }
+                }
+                score += pieceScore;
+            }
+        }
+        return score;
+    }
+
+    private int EvaluatePiecePosition(Board board)
+    {
+        int score = 0;
+
+        foreach (PieceList pieceList in board.GetAllPieceLists())
+        {
+            foreach (Piece piece in pieceList)
+            {
+                int pieceScore = 0;
+
+                switch (piece.PieceType)
+                {
+                    case PieceType.Pawn:
+                        {
+                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Pawn] : -pieceValues[PieceType.Pawn];
+                            break;
+                        }
+                    case PieceType.Knight:
+                        {
+                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Knight] : -pieceValues[PieceType.Knight];
+                            break;
+                        }
+                    case PieceType.Bishop:
+                        {
+                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Bishop] : -pieceValues[PieceType.Bishop];
+                            break;
+                        }
+                    case PieceType.Rook:
+                        {
+                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Rook] : -pieceValues[PieceType.Rook];
+                            break;
+                        }
+                    case PieceType.Queen:
+                        {
+                            pieceScore = piece.IsWhite ? pieceValues[PieceType.Queen] : -pieceValues[PieceType.Queen];
+                            break;
+                        }
+                    case PieceType.King:
+                        {
+                            pieceScore = piece.IsWhite ? pieceValues[PieceType.King] : -pieceValues[PieceType.King];
+                            break;
+                        }
+                }
+                score += pieceScore;
+            }
+        }
+        return score;
     }
 }
